@@ -6,7 +6,6 @@
 
 using System.Diagnostics;
 using System.Formats.Asn1;
-using willCodeMathGame;
 using WillCodeMathGame;
 
 MathGameLogic mathGame = new MathGameLogic();
@@ -15,13 +14,82 @@ Random random = new Random();
 int firstNumber;
 int secondNumber;
 int userMenuSelection;
-int score;
+int score = 0;
 bool gameOver = false;
 
-public enum DifficultyLevel{
-    Easy = 45,
-    Medium = 30,
-    Hard = 15
+DifficultyLevel difficultyLevel = DifficultyLevel.Easy;
+while(!gameOver){
+    userMenuSelection = GetUserMenuSelection(mathGame);
+
+    firstNumber = random.Next(1, 101);
+
+    secondNumber = random.Next(1, 101);
+    switch(userMenuSelection){
+        case 1:
+            score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '+', difficultyLevel);
+            break;
+        case 2:
+            score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '-', difficultyLevel);
+            break;
+        case 3:
+            score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '*', difficultyLevel);
+            break;
+        case 4:
+        while(firstNumber % secondNumber != 0){
+            firstNumber = random.Next(1, 101);
+            secondNumber = random.Next(1, 101);
+        }
+            score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '/', difficultyLevel);
+            break;
+        case 5:
+           int numberOfQuestions = 99;
+           Console.WriteLine("Please enter the number of questions you want to answer: ");
+              while(!int.TryParse(Console.ReadLine(), out numberOfQuestions) || numberOfQuestions < 1 || numberOfQuestions > 100){
+                Console.WriteLine("Please enter a valid number of questions 1-100.");
+              }
+              while(numberOfQuestions > 0){
+                int randomOperation = random.Next(1, 5);
+                if(randomOperation == 1){
+                    firstNumber = random.Next(1, 101);
+                    secondNumber = random.Next(1, 101);
+                    score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '+', difficultyLevel);
+              }else if(randomOperation == 2){
+                    firstNumber = random.Next(1, 101);
+                    secondNumber = random.Next(1, 101);
+                    score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '-', difficultyLevel);
+              }else if(randomOperation == 3){
+                    firstNumber = random.Next(1, 101);
+                    secondNumber = random.Next(1, 101);
+                    score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '*', difficultyLevel);  
+              }else {   
+                    firstNumber = random.Next(1, 101);
+                    secondNumber = random.Next(1, 101);
+                    while(firstNumber % secondNumber != 0){
+                        firstNumber = random.Next(1, 101);
+                        secondNumber = random.Next(1, 101);
+                    }
+                    score += await PerformOperation(mathGame, firstNumber, secondNumber, score, '/', difficultyLevel);
+              }
+              numberOfQuestions--;
+              }
+              break;    
+        case 6:
+           Console.WriteLine("GAME HISTORY: \n");
+           foreach(var operation in mathGame.GameHistory){
+               Console.WriteLine($"{operation}");
+           }
+            break;
+        case 7:
+            difficultyLevel = ChangeDifficulty();
+            DifficultyLevel difficultyEnum = (DifficultyLevel)difficultyLevel;
+            Enum.IsDefined(typeof(DifficultyLevel), difficultyEnum);
+            Console.WriteLine($"You have selected {difficultyEnum} difficulty level.");
+            break;
+        case 8:
+            gameOver = true;
+            Console.WriteLine($"Your final score is {score}");
+            break;
+    }
 }
 
 static DifficultyLevel ChangeDifficulty(){
@@ -119,4 +187,10 @@ static async Task<int> PerformOperation(MathGameLogic mathGame, int firstNumber,
     score += ValideResult(result, userResponse, score);
     return score;
  
+}
+
+public enum DifficultyLevel{
+    Easy = 45,
+    Medium = 30,
+    Hard = 15
 }

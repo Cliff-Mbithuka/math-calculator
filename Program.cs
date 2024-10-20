@@ -4,7 +4,10 @@
 // - You should record previous games in a List and there should be an option in the menu for the user to visualize a history of previous games.
 // - You don't need to record results on a database. Once the program is closed the results will be deleted.
 
+using System.Diagnostics;
+using System.Formats.Asn1;
 using willCodeMathGame;
+using WillCodeMathGame;
 
 MathGameLogic mathGame = new MathGameLogic();
 Random random = new Random();
@@ -62,4 +65,58 @@ static int GetUserMenuSelection(MathGameLogic mathGame){
     }
     }
     return selection;
+}
+
+static async Task<int> GetUserResponse(DifficultyLevel difficulty){
+   int response = 0;
+   int timeout = (int)difficulty;
+
+    Stopwatch stopwatch = new Stopwatch();
+    stopwatch.Start();
+
+    Task<string?> getUserInputTask = Task.Run(() => Console.ReadLine());
+
+    try
+    {
+        string? result = await Task.WhenAny(getUserInputTask, Task.Delay(timeout * 1000)) == getUserInputTask ? getUserInputTask.Result : null;
+
+        stopwatch.Stop();
+
+        if(result != null && int.TryParse(result, out response)){
+            Console.WriteLine($"Time taken to answer: {stopwatch.Elapsed.ToString(@"m\::ss\.fff")}");
+            return response;
+          
+        }else{
+            throw new OperationCanceledException();
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        Console.WriteLine("Time's up!");
+        return -1;
+    }
+}
+
+static int ValideResult(int result, int? userResponse, int score){
+    if(result == userResponse){
+        Console.WriteLine("You answered correctly; You earned 5 point!");
+        score += 5;
+    }else{
+        Console.WriteLine("Try again");
+       Console.WriteLine($"The correct answer is {result}");
+    }
+    return score;
+}
+
+static async Task<int> PerformOperation(MathGameLogic mathGame, int firstNumber, int secondNumber, int score, char operation, DifficultyLevel difficulty){
+    int result;
+    int? userResponse;
+
+    DisplayMathGameQuestion(firstNumber, secondNumber, operation);
+   result = mathGame.MathOperation(firstNumber, secondNumber, operation);
+
+    userResponse = await GetUserResponse(difficulty);
+    score += ValideResult(result, userResponse, score);
+    return score;
+ 
 }

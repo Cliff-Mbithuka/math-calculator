@@ -18,6 +18,7 @@ int score = 0;
 bool gameOver = false;
 
 DifficultyLevel difficultyLevel = DifficultyLevel.Easy;
+
 while(!gameOver){
     userMenuSelection = GetUserMenuSelection(mathGame);
 
